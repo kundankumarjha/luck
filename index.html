@@ -8,6 +8,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <script src='https://kit.fontawesome.com/a076d05399.js'></script>
 <style>
 img {
   border: 1px solid #ddd;
@@ -22,7 +23,6 @@ img:hover {
 <script>
 let playerName = null;
 let luckyNumber = null;
-let count;
 let deck = [];
 let cardMap = new Map();
 cardMap.set(0, 'https://upload.wikimedia.org/wikipedia/commons/2/26/Atlas_deck_10_of_clubs.svg');
@@ -78,25 +78,6 @@ cardMap.set(49, 'https://upload.wikimedia.org/wikipedia/commons/b/bc/Atlas_deck_
 cardMap.set(50, 'https://upload.wikimedia.org/wikipedia/commons/6/60/Atlas_deck_queen_of_hearts.svg');
 cardMap.set(51, 'https://upload.wikimedia.org/wikipedia/commons/6/60/Atlas_deck_queen_of_hearts.svg');
 
-function initlize() {
-	cardMap.forEach( (value, key, map) => {
-	  document.getElementById("cards").innerHTML+="<img src='"+ `${value}` +"' onclick='selected("+ `${key}` +")' data-toggle='modal' data-target='#myModal'>";
-	  deck.push(`${key}`);
-	});
-	count=0;
-	document.getElementById("result").style.display = "none";
-	deck = shuffle(deck);
-}
-function selected(cardNumber) {
-	luckyNumber = cardNumber;
-	document.getElementById("selected-image").innerHTML="<center><img src='"+ cardMap.get(cardNumber) +"' ><center>";
-}
-function start() {
-	playerName = document.getElementById("playerName").value.trim();
-	document.getElementById("first").style.display = "none";
-	document.getElementById("second").style.display = "block";
-	document.getElementById("user-selection").innerHTML='<table class="table table-striped table-bordered"><tr><td><center><B>Hello '+ playerName +',<br>Welcome to "Try Your Luck Game !!!"<br>Your selected lucky card</B><br><i class="fa fa-arrow-right" style="font-size:48px;color:green"></i><center></td><td><center><img src="'+ cardMap.get(luckyNumber) +'"></center></td></tr></table>';
-}
 function shuffle(array) {
   var m = array.length;
   var t;
@@ -115,29 +96,55 @@ function shuffle(array) {
   }
   return array;
 }
+
+function initlize() {
+	cardMap.forEach( (value, key, map) => {
+	  document.getElementById("cards").innerHTML+="<img src='"+ `${value}` +"' onclick='selected("+ `${key}` +")' data-toggle='modal' data-target='#myModal' data-backdrop='static' data-keyboard='false'>";
+	  deck.push(`${key}`);
+	});
+	deck = shuffle(deck);
+}
+
+function selected(cardNumber) {
+	luckyNumber = cardNumber;
+	document.getElementById("selected-image").innerHTML="<center><img src='"+ cardMap.get(cardNumber) +"' ><center>";
+}
+
+function start() {
+	playerName = document.getElementById("playerName").value.trim();
+	document.getElementById("first").style.display = "none";
+	document.getElementById("second").style.display = "block";
+	document.getElementById("user-selection").innerHTML='<table class="table table-striped table-bordered"><tr><td><center><B>Hello '+ playerName +',<br>Welcome to "Try Your Luck Game !!!"<br>Your selected lucky card</B><br><i class="fa fa-arrow-right" style="font-size:48px;color:green"></i><center></td><td><center><img src="'+ cardMap.get(luckyNumber) +'"></center></td><td><center><button class="btn btn-primary" data-dismiss="modal" onclick="playAgain()" id="playAgainBtn">Restart</button></center></td></tr></table>';
+}
+
 function play() {
-	count++;
+	document.getElementById("play").innerHTML='<i class="fa fa-spinner fa-spin"></i>';
 	var userValue = deck.pop() ;
 	var computerValue = deck.pop();
 	var table = document.getElementById("board");
 	var row = table.insertRow(1);	
 	var cell1 = row.insertCell(0);
-	cell1.innerHTML = '<img src="'+ cardMap.get(parseInt(userValue)) +'">';
+	cell1.innerHTML = '<center><img src="'+ cardMap.get(parseInt(userValue)) +'"></center>';
 	var cell2 = row.insertCell(1);
-	cell2.innerHTML = '<img src="'+ cardMap.get(parseInt(computerValue)) +'">';;
+	cell2.innerHTML = '';
+	var cell3 = row.insertCell(2);
+	cell3.innerHTML = '<center><img src="'+ cardMap.get(parseInt(computerValue)) +'"></center>';;
 	
 	if(luckyNumber == userValue || luckyNumber == computerValue) {
+		$("#resultModal").modal({backdrop: 'static',keyboard: false});
+		$("#resultModal").modal("show");
 		document.getElementById("result").style.display = "block";
 		document.getElementById("play").disabled=true;
 	}
 	
 	if(luckyNumber == userValue) {
-		document.getElementById("result").innerHTML = "<B>Congratulation You Won Game in " + count + " chance !!!</B>";
+		document.getElementById("result").innerHTML = "<center><i class='far fa-thumbs-up' style='font-size:75px;color:green'></i><br><H1>Won</H1></center>";
 		document.getElementById("result").classList.add('alert-success');
 	} else if(luckyNumber == computerValue) {
-		document.getElementById("result").innerHTML = "<B>Sorry You Lost Game !!!</B>";
+		document.getElementById("result").innerHTML = "<center><i class='far fa-thumbs-down' style='font-size:75px;color:red'></i><br><H1>Lost</H1></center>";
 		document.getElementById("result").classList.add('alert-danger');
 	}
+	document.getElementById("play").innerHTML='<i class="fa fa-play"></i>';
 }
 function enableGame(txt) {
   var bt = document.getElementById('startGameBtn');
@@ -147,6 +154,21 @@ function enableGame(txt) {
     bt.removeAttribute("disabled");
   }
 }
+
+function playAgain() {
+	luckyNumber = null;
+	deck = [];
+	initlize();
+	document.getElementById("first").style.display = "block";
+	document.getElementById("second").style.display = "none";
+	document.getElementById("playerName").value = playerName;
+	document.getElementById("play").disabled=false;
+	var table = document.getElementById("board");
+	for (var x=table.rows.length-1; x>0; x--) {
+		table.deleteRow(x);
+	}
+}
+
 </script>
 </head>
 <body onload="initlize()">
@@ -158,20 +180,13 @@ function enableGame(txt) {
 	
 	<div id="second" style="display:none">
 		<div class=".container-fluid">
-			<div class="card">
-				<div class="card-header" id="user-selection"></div>
-			</div>
-			<div class="input-group input-group-lg">
-				<Button id="play" onClick="play()" class="btn btn-primary btn-lg btn-block">Play</Button>
-			</div>
-			
-			<div id="result" class="alert" role="alert" >
-			</div>
-			<table id="board" class="table table-striped table-bordered" style="height:100px; overflow-x:auto;">
+			<div class="card" id="user-selection"></div>
+			<table id="board" class="table table-striped">
 				<thead class="thead-dark">
 					<tr>
-					  <th scope="col">You</th>
-					  <th scope="col">Computer</th>
+					  <th scope="col"><center>You Card(s)</center></th>
+					  <th scope="col"><center><Button id="play" onClick="play()" class="btn btn-primary"><i class="fa fa-play"></i></Button></center></th>
+					  <th scope="col"><center>Computer Card(s)</center></th>
 					</tr>
 				</thead>
 				<tbody style="overflow-y:scroll"></tbody>
@@ -181,7 +196,6 @@ function enableGame(txt) {
 </div>
 
 <div class="container">
-  <!-- The Modal -->
   <div class="modal" id="myModal">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -203,7 +217,20 @@ function enableGame(txt) {
       </div>
     </div>
   </div>
-  
+</div>
+
+<div class="container">
+  <div class="modal" id="resultModal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+		<div class="modal-body" id="result">
+		</div>
+        <div class="modal-footer">
+			<button class="btn btn-primary" data-dismiss="modal" onclick="playAgain()" id="playAgainBtn">Play Again</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 </body>
