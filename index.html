@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html>
 <head>
 <Title> Try your luck - By Kundan Jha</title>
@@ -21,10 +20,14 @@ img:hover {
 }
 </style>
 <script>
-let playerName = null;
+let playerName = localStorage.getItem("playerName");
 let luckyNumber = null;
 let deck = [];
 let cardMap = new Map();
+let total=localStorage.getItem("total")=== null ? 0 : localStorage.getItem("total");
+let won=localStorage.getItem("won") === null ? 0 : localStorage.getItem("won");
+let lost=localStorage.getItem("lost") === null ? 0: localStorage.getItem("lost");
+
 cardMap.set(0, 'https://upload.wikimedia.org/wikipedia/commons/2/26/Atlas_deck_10_of_clubs.svg');
 cardMap.set(1, 'https://upload.wikimedia.org/wikipedia/commons/e/e9/Atlas_deck_10_of_diamonds.svg');
 cardMap.set(2, 'https://upload.wikimedia.org/wikipedia/commons/9/91/Atlas_deck_10_of_spades.svg');
@@ -108,13 +111,16 @@ function initlize() {
 function selected(cardNumber) {
 	luckyNumber = cardNumber;
 	document.getElementById("selected-image").innerHTML="<center><img src='"+ cardMap.get(cardNumber) +"' ><center>";
+	document.getElementById("playerName").value = playerName;
+	enableGame(document.getElementById("playerName"));
 }
 
 function start() {
 	playerName = document.getElementById("playerName").value.trim();
+	localStorage.setItem("playerName", playerName);
 	document.getElementById("first").style.display = "none";
 	document.getElementById("second").style.display = "block";
-	document.getElementById("user-selection").innerHTML='<table class="table table-striped table-bordered"><tr><td><center><B>Hello '+ playerName +',<br>Welcome to "Try Your Luck Game !!!"<br>Your selected lucky card</B><br><i class="fa fa-arrow-right" style="font-size:48px;color:green"></i><center></td><td><center><img src="'+ cardMap.get(luckyNumber) +'"></center></td><td><center><button class="btn btn-primary" data-dismiss="modal" onclick="playAgain()" id="playAgainBtn">Restart</button></center></td></tr></table>';
+	document.getElementById("user-selection").innerHTML='<table class="table table-striped table-bordered"><tr><td><center><B>Hello '+ playerName +',<br>Welcome to "Try Your Luck Game !!!"<br>Your selected lucky card</B><br><i class="fa fa-arrow-right" style="font-size:48px;color:green"></i><center></td><td><center><img src="'+ cardMap.get(luckyNumber) +'"></center></td><td><center><div id="score"><b>Score<br>Total : '+ total +'<br>Won : '+ won +'<br>Lost : '+lost+'</b></div><button class="btn btn-primary" data-dismiss="modal" onclick="playAgain()" id="playAgainBtn">Change Lucky Card</button></center></td></tr></table>';
 }
 
 function play() {
@@ -135,14 +141,16 @@ function play() {
 		$("#resultModal").modal("show");
 		document.getElementById("result").style.display = "block";
 		document.getElementById("play").disabled=true;
+		localStorage.setItem("total",++total)
 	}
-	
 	if(luckyNumber == userValue) {
 		document.getElementById("result").innerHTML = "<center><i class='far fa-thumbs-up' style='font-size:75px;color:green'></i><br><H1>Won</H1></center>";
 		document.getElementById("result").classList.add('alert-success');
+		localStorage.setItem("won",++won)
 	} else if(luckyNumber == computerValue) {
 		document.getElementById("result").innerHTML = "<center><i class='far fa-thumbs-down' style='font-size:75px;color:red'></i><br><H1>Lost</H1></center>";
 		document.getElementById("result").classList.add('alert-danger');
+		localStorage.setItem("lost",++lost)
 	}
 	document.getElementById("play").innerHTML='<i class="fa fa-play"></i>';
 }
@@ -157,18 +165,25 @@ function enableGame(txt) {
 
 function playAgain() {
 	luckyNumber = null;
-	deck = [];
-	initlize();
 	document.getElementById("first").style.display = "block";
 	document.getElementById("second").style.display = "none";
-	document.getElementById("playerName").value = playerName;
+	commonReset();
+	initlize();
+}
+
+function playAgainSameCard() {
+	commonReset();
+	initlize();
+	document.getElementById("score").innerHTML='<b>Score<br>Total : '+ total +'<br>Won : '+ won +'<br>Lost : '+lost+'</b>';
+}
+function commonReset() {
+	deck = [];
 	document.getElementById("play").disabled=false;
 	var table = document.getElementById("board");
 	for (var x=table.rows.length-1; x>0; x--) {
 		table.deleteRow(x);
 	}
 }
-
 </script>
 </head>
 <body onload="initlize()">
@@ -226,7 +241,8 @@ function playAgain() {
 		<div class="modal-body" id="result">
 		</div>
         <div class="modal-footer">
-			<button class="btn btn-primary" data-dismiss="modal" onclick="playAgain()" id="playAgainBtn">Play Again</button>
+			<button class="btn btn-primary" data-dismiss="modal" onclick="playAgainSameCard()" id="playAgainSameCardBtn">Play Again</button>
+			<button class="btn btn-secondary" data-dismiss="modal" onclick="playAgain()" id="playAgainBtn">Change Lucky Card</button>
         </div>
       </div>
     </div>
