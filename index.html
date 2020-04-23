@@ -101,6 +101,7 @@ function shuffle(array) {
 }
 
 function initlize() {
+	document.getElementById("cards").innerHTML="";
 	cardMap.forEach( (value, key, map) => {
 	  document.getElementById("cards").innerHTML+="<img src='"+ `${value}` +"' onclick='selected("+ `${key}` +")' data-toggle='modal' data-target='#myModal' data-backdrop='static' data-keyboard='false'>";
 	  deck.push(`${key}`);
